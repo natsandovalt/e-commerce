@@ -13,6 +13,16 @@ class ApplicationForm
     def after_commit(...)
       set_callback(:commit, :after, ...)
     end
+
+    def from(params)
+      new(params.permit(attribute_names.map(&:to_sym)))
+    end
+  end
+
+  def model_name
+    ActiveModel::Name.new(
+      nil, nil, self.class.name.sub(/Form$/, "")
+    )
   end
 
   def save

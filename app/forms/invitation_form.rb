@@ -1,4 +1,4 @@
-class UserInvitationForm < ApplicationForm
+class InvitationForm < ApplicationForm
   attribute :email
   attribute :send_copy, :boolean
 
