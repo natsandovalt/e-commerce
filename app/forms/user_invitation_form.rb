@@ -1,30 +1,29 @@
-class UserInvitationForm
-  attr_reader :user, :send_copy, :sender
+class UserInvitationForm < ApplicationForm
+  attribute :email
+  attribute :send_copy, :boolean
 
-  def initialize(params, send_copy: false, sender: nil)
-    @user = User.new(params)
-    @send_copy = send_copy.in?(%w[1 t true])
-    @sender = sender
-  end
+  attr_accessor :sender
 
-  def save
-    validate!
-    return false if user.errors.any?
+  validates :email, presence: true
 
-    user.save!
-    deliver_notifications!
-  end
+  after_commit :deliver_invitation
+  after_commit :deliver_invitation_copy, if: :send_copy
 
   private
 
-    def validate!
-      user.errors.add(:email, :blank) if user.email.blank?
+    attr_reader :user
+
+    def submit!
+      @user = User.new(email: email)
+      user.save!
+      deliver_notifications!
     end
 
-    def deliver_notifications!
+    def deliver_invitation
       UserMailer.invite(user).deliver_later
-      if send_copy
-        UserMailer.invite_copy(sender, user).deliver_later
-      end
+    end
+
+    def deliver_invitation_copy
+      UserMailer.invite_copy(sender, user).deliver_later if sender.present?
     end
 end
