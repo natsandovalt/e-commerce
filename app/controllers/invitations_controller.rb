@@ -4,15 +4,16 @@ class InvitationsController < ApplicationController
   end
 
   def create
-    @user = User.new(params.require(:user).permit(:email))
-    @user.should_send_invitation = true
-
-    if @user.save
-      if params[:send_copy] == "1"
-        UserMailer.invitation_copy(current_user, @user).deliver_later
-      end
+    form = UserInvitationForm.new(
+      params.require(:user).permit(:email).to_h,
+      send_copy: params[:send_copy],
+      send_copy_to: current_user
+    )
+    
+    if form.save
       redirect_to root_path
     else
+      @user = form.user
       render :new, status: :unprocessable_entity
     end
   end
