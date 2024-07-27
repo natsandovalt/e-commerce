@@ -34,6 +34,12 @@ class ApplicationForm
     end
   end
 
+  def merge_errors!(other)
+    other.errors.each do |e|
+      errors.add(e.attribute, e.type, message: e.message)
+    end
+  end
+
   private
 
     def with_transaction(&)

@@ -4,19 +4,28 @@ class InvitationForm < ApplicationForm
 
   attr_accessor :sender
 
-  validates :email, presence: true
+  validate :user_is_valid 
 
-  after_commit :deliver_invitation
-  after_commit :deliver_invitation_copy, if: :send_copy
+  # after_commit :deliver_invitation
+  # after_commit :deliver_invitation_copy, if: :send_copy
+
+  def initialize(...)
+    super
+    @user = User.new(email: email)
+  end
 
   private
 
     attr_reader :user
 
     def submit!
-      @user = User.new(email: email)
       user.save!
-      deliver_notifications!
+    end
+
+    def user_is_valid
+      return if user.valid?
+      
+      merge_errors!(user)
     end
 
     def deliver_invitation

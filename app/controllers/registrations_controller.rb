@@ -1,13 +1,12 @@
 class RegistrationsController < ApplicationController
   def new
-    @user = User.new
+    @registration_form = RegistrationForm.new
   end
 
   def create
-    @user = User.new(params.require(:user).permit(:email, :name))
-    @user.should_send_welcome_email = true
+    @registration_form = RegistrationForm.from(params.require(:registration))
 
-    if @user.save
+    if @registration_form.save
       redirect_to root_path
     else
       render :new, status: :unprocessable_entity
